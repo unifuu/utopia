@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "./game_service";
+
+package game_service;
+
+service GameService {
+    rpc JoinGame (JoinGameReq) returns (JoinGameResp);
+    rpc MovePlayer (MovePlayerReq) returns (MovePlayerResp);
+}
+
+message JoinGameReq {
+    string game_id = 1;
+    string player_id = 2;
+}
+
+message JoinGameResp {
+    string game_id = 1;
+    string message = 2;
+}
+
+message MovePlayerReq {
+    string game_id = 1;
+    string player_id = 2;
+    int32 x = 3;
+    int32 y = 4;
+}
+
+message MovePlayerResp {
+    bool success = 1;
+    string message = 2;
+}
