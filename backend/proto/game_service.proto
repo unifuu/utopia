@@ -1,3 +1,5 @@
+// protoc --go_out=. --go-grpc_out=. game_service.proto
+
 syntax = "proto3";
 
 option go_package = "./game_service";
@@ -7,6 +9,7 @@ package game_service;
 service GameService {
     rpc JoinGame (JoinGameReq) returns (JoinGameResp);
     rpc MovePlayer (MovePlayerReq) returns (MovePlayerResp);
+    rpc QuitGame (QuitGameReq) returns (QuitGameResp);
 }
 
 message JoinGameReq {
@@ -15,7 +18,7 @@ message JoinGameReq {
 }
 
 message JoinGameResp {
-    string game_id = 1;
+    bool success = 1;
     string message = 2;
 }
 
@@ -27,6 +30,16 @@ message MovePlayerReq {
 }
 
 message MovePlayerResp {
+    bool success = 1;
+    string message = 2;
+}
+
+message QuitGameReq {
+    string game_id = 1;
+    string player_id = 2;
+}
+
+message QuitGameResp {
     bool success = 1;
     string message = 2;
 }

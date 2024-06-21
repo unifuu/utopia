@@ -36,11 +36,26 @@ func (s *server) JoinGame(ctx context.Context, req *pb.JoinGameReq) (*pb.JoinGam
 
 	if _, playerExists := players[req.GetPlayerId()]; !playerExists {
 		players[req.GetPlayerId()] = true
-		fmt.Println(req.GetPlayerId(), "has joined the game:", req.GetGameId())
-		return &pb.JoinGameResp{GameId: req.GetGameId(), Message: "Player added to the game"}, nil
+		fmt.Println(req.GetPlayerId(), "joined the game:", req.GetGameId())
+		return &pb.JoinGameResp{Success: true, Message: "Player added to the game"}, nil
 	}
 
-	return &pb.JoinGameResp{GameId: req.GetGameId(), Message: "Player already in the game"}, nil
+	return &pb.JoinGameResp{Success: false, Message: "Player already in the game"}, nil
+}
+
+func (s *server) QuitGame(ctx context.Context, req *pb.QuitGameReq) (*pb.QuitGameResp, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	players := s.games[req.GetGameId()]
+	if players[req.GetPlayerId()] {
+		players[req.GetPlayerId()] = false
+		fmt.Println(req.GetPlayerId(), "quitted the game:", req.GetGameId())
+		return &pb.QuitGameResp{Success: true, Message: "Player quitted the game"}, nil
+	} else {
+		fmt.Println(req.GetPlayerId(), "did not join the game:", req.GetGameId())
+		return &pb.QuitGameResp{Success: false, Message: "Player did not join the game"}, nil
+	}
 }
 
 func (s *server) MovePlayer(ctx context.Context, req *pb.MovePlayerReq) (*pb.MovePlayerResp, error) {

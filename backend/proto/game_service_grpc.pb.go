@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type GameServiceClient interface {
 	JoinGame(ctx context.Context, in *JoinGameReq, opts ...grpc.CallOption) (*JoinGameResp, error)
 	MovePlayer(ctx context.Context, in *MovePlayerReq, opts ...grpc.CallOption) (*MovePlayerResp, error)
+	QuitGame(ctx context.Context, in *QuitGameReq, opts ...grpc.CallOption) (*QuitGameResp, error)
 }
 
 type gameServiceClient struct {
@@ -52,12 +53,22 @@ func (c *gameServiceClient) MovePlayer(ctx context.Context, in *MovePlayerReq, o
 	return out, nil
 }
 
+func (c *gameServiceClient) QuitGame(ctx context.Context, in *QuitGameReq, opts ...grpc.CallOption) (*QuitGameResp, error) {
+	out := new(QuitGameResp)
+	err := c.cc.Invoke(ctx, "/game_service.GameService/QuitGame", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GameServiceServer is the server API for GameService service.
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility
 type GameServiceServer interface {
 	JoinGame(context.Context, *JoinGameReq) (*JoinGameResp, error)
 	MovePlayer(context.Context, *MovePlayerReq) (*MovePlayerResp, error)
+	QuitGame(context.Context, *QuitGameReq) (*QuitGameResp, error)
 	mustEmbedUnimplementedGameServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedGameServiceServer) JoinGame(context.Context, *JoinGameReq) (*
 }
 func (UnimplementedGameServiceServer) MovePlayer(context.Context, *MovePlayerReq) (*MovePlayerResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MovePlayer not implemented")
+}
+func (UnimplementedGameServiceServer) QuitGame(context.Context, *QuitGameReq) (*QuitGameResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QuitGame not implemented")
 }
 func (UnimplementedGameServiceServer) mustEmbedUnimplementedGameServiceServer() {}
 
@@ -120,6 +134,24 @@ func _GameService_MovePlayer_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GameService_QuitGame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuitGameReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).QuitGame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/game_service.GameService/QuitGame",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).QuitGame(ctx, req.(*QuitGameReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GameService_ServiceDesc is the grpc.ServiceDesc for GameService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var GameService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MovePlayer",
 			Handler:    _GameService_MovePlayer_Handler,
+		},
+		{
+			MethodName: "QuitGame",
+			Handler:    _GameService_QuitGame_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
